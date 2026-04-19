@@ -1,0 +1,142 @@
+@page
+@model Leads.Web.Pages.Companies.IndexModel
+@using Leads.Localization
+@using Leads.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    PageLayout.Content.Title = L["Companies"].Value;
+    PageLayout.Content.MenuItemName = LeadsMenus.Companies;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label asp-for="Input.Filter" class="form-label">@L["Filter"]</label>
+                <input asp-for="Input.Filter" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="Input.Name" class="form-label">@L["CompanyName"]</label>
+                <input asp-for="Input.Name" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="Input.ShortName" class="form-label">@L["ShortName"]</label>
+                <input asp-for="Input.ShortName" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="Input.TaxId" class="form-label">@L["TaxId"]</label>
+                <input asp-for="Input.TaxId" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="Input.IndustryCategory" class="form-label">@L["IndustryCategory"]</label>
+                <input asp-for="Input.IndustryCategory" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label asp-for="Input.EmployeeCountOperator" class="form-label">@L["EmployeeCount"]</label>
+                <div class="input-group">
+                    <select asp-for="Input.EmployeeCountOperator" class="form-select">
+                        <option value="">@L["Operator"]</option>
+                        <option value="Equal">=</option>
+                        <option value="GreaterThan">&gt;</option>
+                        <option value="LessThan">&lt;</option>
+                    </select>
+                    <input asp-for="Input.EmployeeCountValue" type="number" class="form-control" placeholder="@L["Value"]" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label asp-for="Input.CapitalAmountOperator" class="form-label">@L["CapitalAmount"]</label>
+                <div class="input-group">
+                    <select asp-for="Input.CapitalAmountOperator" class="form-select">
+                        <option value="">@L["Operator"]</option>
+                        <option value="Equal">=</option>
+                        <option value="GreaterThan">&gt;</option>
+                        <option value="LessThan">&lt;</option>
+                    </select>
+                    <input asp-for="Input.CapitalAmountValue" type="number" step="0.01" class="form-control" placeholder="@L["Value"]" />
+                </div>
+            </div>
+            <div class="col-12 d-flex gap-2 justify-content-between flex-wrap">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">@L["Search"]</button>
+                    <a asp-page="/Companies/Index" class="btn btn-outline-secondary">@L["Reset"]</a>
+                </div>
+                @if (Model.CanCreate)
+                {
+                    <a asp-page="/Companies/Create" class="btn btn-success">
+                        <i class="fa fa-plus me-1"></i>@L["NewCompany"]
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["CompanyName"]</th>
+                        <th>@L["ShortName"]</th>
+                        <th>@L["TaxId"]</th>
+                        <th>@L["IndustryCategory"]</th>
+                        <th>@L["EmployeeCount"]</th>
+                        <th>@L["CapitalAmount"]</th>
+                        <th>@L["ContactPerson"]</th>
+                        <th>@L["PhoneNumber"]</th>
+                        <th>@L["Website"]</th>
+                        <th class="text-end">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Companies.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center py-4 text-muted">@L["NoCompaniesFound"]</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var company in Model.Companies)
+                        {
+                            <tr>
+                                <td>@company.Name</td>
+                                <td>@company.ShortName</td>
+                                <td>@company.TaxId</td>
+                                <td>@company.IndustryCategory</td>
+                                <td>@company.EmployeeCount</td>
+                                <td>@company.CapitalAmount.ToString("N2")</td>
+                                <td>@company.ContactPerson</td>
+                                <td>@company.PhoneNumber</td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(company.Website))
+                                    {
+                                        <a href="@company.Website" target="_blank" rel="noreferrer">@company.Website</a>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-2">
+                                        @if (Model.CanEdit)
+                                        {
+                                            <a asp-page="/Companies/Edit" asp-route-id="@company.Id" class="btn btn-sm btn-outline-primary">@L["Edit"]</a>
+                                        }
+                                        @if (Model.CanDelete)
+                                        {
+                                            <form method="post" asp-page-handler="Delete" asp-route-id="@company.Id" class="d-inline" onsubmit="return confirm('@L["DeleteConfirmationMessage", company.Name]');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">@L["Delete"]</button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

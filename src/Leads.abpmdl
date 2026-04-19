@@ -1,0 +1,113 @@
+{
+  "template": "app",
+  "imports": {
+    "Volo.Abp.BasicTheme": {
+      "version": "10.2.0",
+      "isInstalled": true,
+      "creationTime": "04/19/2026 00:18:48 +00:00"
+    },
+    "Volo.Abp.Account": {
+      "version": "10.2.0",
+      "isInstalled": true,
+      "creationTime": "04/19/2026 00:18:48 +00:00"
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "10.2.0",
+      "isInstalled": true,
+      "creationTime": "04/19/2026 00:18:48 +00:00"
+    },
+    "Volo.Abp.Identity": {
+      "version": "10.2.0",
+      "isInstalled": true,
+      "creationTime": "04/19/2026 00:18:48 +00:00"
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "10.2.0",
+      "isInstalled": true,
+      "creationTime": "04/19/2026 00:18:48 +00:00"
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "10.2.0",
+      "isInstalled": true,
+      "creationTime": "04/19/2026 00:18:48 +00:00"
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "10.2.0",
+      "isInstalled": true,
+      "creationTime": "04/19/2026 00:18:48 +00:00"
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "10.2.0",
+      "isInstalled": true,
+      "creationTime": "04/19/2026 00:18:48 +00:00"
+    }
+  },
+  "folders": {
+    "items": {
+      "src": {},
+      "test": {}
+    }
+  },
+  "packages": {
+    "Leads.Application": {
+      "path": "src/Leads.Application/Leads.Application.abppkg",
+      "folder": "src"
+    },
+    "Leads.Application.Tests": {
+      "path": "test/Leads.Application.Tests/Leads.Application.Tests.abppkg",
+      "folder": "test"
+    },
+    "Leads.Domain.Shared": {
+      "path": "src/Leads.Domain.Shared/Leads.Domain.Shared.abppkg",
+      "folder": "src"
+    },
+    "Leads.Application.Contracts": {
+      "path": "src/Leads.Application.Contracts/Leads.Application.Contracts.abppkg",
+      "folder": "src"
+    },
+    "Leads.HttpApi": {
+      "path": "src/Leads.HttpApi/Leads.HttpApi.abppkg",
+      "folder": "src"
+    },
+    "Leads.HttpApi.Client": {
+      "path": "src/Leads.HttpApi.Client/Leads.HttpApi.Client.abppkg",
+      "folder": "src"
+    },
+    "Leads.Web": {
+      "path": "src/Leads.Web/Leads.Web.abppkg",
+      "folder": "src"
+    },
+    "Leads.Web.Tests": {
+      "path": "test/Leads.Web.Tests/Leads.Web.Tests.abppkg",
+      "folder": "test"
+    },
+    "Leads.EntityFrameworkCore.Tests": {
+      "path": "test/Leads.EntityFrameworkCore.Tests/Leads.EntityFrameworkCore.Tests.abppkg",
+      "folder": "test"
+    },
+    "Leads.EntityFrameworkCore": {
+      "path": "src/Leads.EntityFrameworkCore/Leads.EntityFrameworkCore.abppkg",
+      "folder": "src"
+    },
+    "Leads.TestBase": {
+      "path": "test/Leads.TestBase/Leads.TestBase.abppkg",
+      "folder": "test"
+    },
+    "Leads.Domain.Tests": {
+      "path": "test/Leads.Domain.Tests/Leads.Domain.Tests.abppkg",
+      "folder": "test"
+    },
+    "Leads.HttpApi.Client.ConsoleTestApp": {
+      "path": "test/Leads.HttpApi.Client.ConsoleTestApp/Leads.HttpApi.Client.ConsoleTestApp.abppkg",
+      "folder": "test"
+    },
+    "Leads.DbMigrator": {
+      "path": "src/Leads.DbMigrator/Leads.DbMigrator.abppkg",
+      "folder": "src"
+    },
+    "Leads.Domain": {
+      "path": "src/Leads.Domain/Leads.Domain.abppkg",
+      "folder": "src"
+    }
+  }
+}

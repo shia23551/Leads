@@ -1,0 +1,44 @@
+@page
+@model Leads.Web.Pages.IndexModel
+@using Leads.Localization
+@using Leads.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    PageLayout.Content.Title = L["Menu:Home"].Value;
+    PageLayout.Content.BreadCrumb.ShowCurrent = false;
+    PageLayout.Content.ShowToolbar = false;
+    PageLayout.Content.MenuItemName = LeadsMenus.Home;
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <span class="badge bg-primary-subtle text-primary mb-3">@L["AppName"]</span>
+                <h2 class="mb-3">@L["Home:Title"]</h2>
+                <p class="text-muted mb-4">@L["Home:Description"]</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-primary" href="/Companies">@L["Menu:Companies"]</a>
+                    <a class="btn btn-outline-secondary" href="/TenantManagement">@L["Home:ManageTenants"]</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+                <h5 class="mb-3">@L["Home:QuickInfoTitle"]</h5>
+                <p class="text-muted mb-2">@L["Home:QuickInfoDescription"]</p>
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">@L["Home:DefaultTenant"]</dt>
+                    <dd class="col-sm-7">Share</dd>
+                    <dt class="col-sm-5">@L["Home:MainModule"]</dt>
+                    <dd class="col-sm-7">@L["Menu:Companies"]</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

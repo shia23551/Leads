@@ -1,0 +1,25 @@
+@page
+@model Leads.Web.Pages.Companies.CreateModel
+@using Leads.Localization
+@using Leads.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    PageLayout.Content.Title = L["NewCompany"].Value;
+    PageLayout.Content.MenuItemName = LeadsMenus.Companies;
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <partial name="_CompanyForm" model="Model.Company" />
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                <a asp-page="/Companies/Index" class="btn btn-outline-secondary">@L["Cancel"]</a>
+            </div>
+        </form>
+    </div>
+</div>

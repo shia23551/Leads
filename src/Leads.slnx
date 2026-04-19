@@ -1,0 +1,24 @@
+<Solution>
+    <Configurations>
+        <Platform Name="Any CPU" />
+    </Configurations>
+    <Folder Name="/src/">
+        <Project Path="src/Leads.Domain/Leads.Domain.csproj" />
+        <Project Path="src/Leads.Application/Leads.Application.csproj" />
+        <Project Path="src/Leads.EntityFrameworkCore/Leads.EntityFrameworkCore.csproj" />
+        <Project Path="src/Leads.Web/Leads.Web.csproj" />
+        <Project Path="src/Leads.Domain.Shared/Leads.Domain.Shared.csproj" />
+        <Project Path="src/Leads.Application.Contracts/Leads.Application.Contracts.csproj" />
+        <Project Path="src/Leads.HttpApi/Leads.HttpApi.csproj" />
+        <Project Path="src/Leads.HttpApi.Client/Leads.HttpApi.Client.csproj" />
+        <Project Path="src/Leads.DbMigrator/Leads.DbMigrator.csproj" />
+    </Folder>
+    <Folder Name="/test/">
+        <Project Path="test/Leads.Application.Tests/Leads.Application.Tests.csproj" />
+        <Project Path="test/Leads.Web.Tests/Leads.Web.Tests.csproj" />
+        <Project Path="test/Leads.EntityFrameworkCore.Tests/Leads.EntityFrameworkCore.Tests.csproj" />
+        <Project Path="test/Leads.TestBase/Leads.TestBase.csproj" />
+        <Project Path="test/Leads.Domain.Tests/Leads.Domain.Tests.csproj" />
+        <Project Path="test/Leads.HttpApi.Client.ConsoleTestApp/Leads.HttpApi.Client.ConsoleTestApp.csproj" />
+    </Folder>
+</Solution>

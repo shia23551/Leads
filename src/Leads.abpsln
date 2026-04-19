@@ -1,0 +1,56 @@
+{
+  "id": "d61c9454-c6d6-413b-84ee-c15062bb4f85",
+  "creationTime": "04/19/2026 00:18:48 +00:00",
+  "template": "app",
+  "versions": {
+    "AbpFramework": "10.2.0",
+    "AbpStudio": "2.2.6",
+    "TargetDotnetFramework": "net10.0"
+  },
+  "modules": {
+    "Leads": {
+      "path": "Leads.abpmdl"
+    }
+  },
+  "runProfiles": {
+    "Default": {
+      "path": "etc/abp-studio/run-profiles/Default.abprun.json"
+    }
+  },
+  "options": {
+    "httpRequests": {
+      "ignoredUrls": [
+      
+      ]
+    }
+  },
+  "creatingStudioConfiguration": {
+    "template": "app",
+    "createdAbpStudioVersion": "2.2.6",
+    "creationTool": "ABP Studio CLI",
+    "tiered": "false",
+    "runInstallLibs": "",
+    "useLocalReferences": "false",
+    "multiTenancy": "true",
+    "includeTests": "true",
+    "kubernetesConfiguration": "false",
+    "uiFramework": "mvc",
+    "mobileFramework": "none",
+    "distributedEventBus": "none",
+    "databaseProvider": "ef",
+    "runDbMigrator": "",
+    "databaseManagementSystem": "sqlserver",
+    "separateTenantSchema": "false",
+    "createInitialMigration": "",
+    "theme": "basic",
+    "themeStyle": "",
+    "themeMenuPlacement": "",
+    "mobileFramework": "none",
+    "publicWebsite": "false",
+    "socialLogin": "true",
+    "sampleCrudPage": "false",
+    "selectedLanguages": ["English", "Arabic", "Chinese (Simplified)", "Chinese (Traditional)", "Czech", "English (United Kingdom)", "Finnish", "French", "German (Germany)", "Hindi ", "Hungarian", "Icelandic", "Italian", "Portuguese (Brazil)", "Romanian (Romania)", "Russian", "Slovak", "Spanish", "Swedish", "Turkish", ],
+    "defaultLanguage": "English",
+    "createCommand": "abp new Leads -t app --ui-framework mvc --database-provider ef --database-management-system sqlserver --theme basic --skip-migration  --skip-migrator  --without-cms-kit --dont-run-install-libs --dont-run-bundling --use-open-source-template"
+  }
+}

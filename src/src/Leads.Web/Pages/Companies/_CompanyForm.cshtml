@@ -1,0 +1,53 @@
+@model Leads.Companies.CreateUpdateCompanyDto
+@using Leads.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<LeadsResource> L
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <label asp-for="Name" class="form-label">@L["CompanyName"]</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ShortName" class="form-label">@L["ShortName"]</label>
+        <input asp-for="ShortName" class="form-control" />
+        <span asp-validation-for="ShortName" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="TaxId" class="form-label">@L["TaxId"]</label>
+        <input asp-for="TaxId" class="form-control" />
+        <span asp-validation-for="TaxId" class="text-danger"></span>
+        <small class="text-muted">@L["TaxIdHint"]</small>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="IndustryCategory" class="form-label">@L["IndustryCategory"]</label>
+        <input asp-for="IndustryCategory" class="form-control" />
+        <span asp-validation-for="IndustryCategory" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="EmployeeCount" class="form-label">@L["EmployeeCount"]</label>
+        <input asp-for="EmployeeCount" class="form-control" />
+        <span asp-validation-for="EmployeeCount" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="CapitalAmount" class="form-label">@L["CapitalAmount"]</label>
+        <input asp-for="CapitalAmount" class="form-control" />
+        <span asp-validation-for="CapitalAmount" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ContactPerson" class="form-label">@L["ContactPerson"]</label>
+        <input asp-for="ContactPerson" class="form-control" />
+        <span asp-validation-for="ContactPerson" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="PhoneNumber" class="form-label">@L["PhoneNumber"]</label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Website" class="form-label">@L["Website"]</label>
+        <input asp-for="Website" class="form-control" />
+        <span asp-validation-for="Website" class="text-danger"></span>
+    </div>
+</div>
