@@ -19,11 +19,19 @@ public class CompanyListInput : PagedResultRequestDto
 
     public string? IndustryCategory { get; set; }
 
-    public ComparisonOperator? EmployeeCountOperator { get; set; }
+    public ComparisonOperator? EmployeeCountLowerBoundOperator { get; set; }
 
-    public int? EmployeeCountValue { get; set; }
+    public int? EmployeeCountLowerBoundValue { get; set; }
 
-    public ComparisonOperator? CapitalAmountOperator { get; set; }
+    public ComparisonOperator? EmployeeCountUpperBoundOperator { get; set; }
 
-    public decimal? CapitalAmountValue { get; set; }
+    public int? EmployeeCountUpperBoundValue { get; set; }
+
+    public ComparisonOperator? CapitalAmountLowerBoundOperator { get; set; }
+
+    public decimal? CapitalAmountLowerBoundValue { get; set; }
+
+    public ComparisonOperator? CapitalAmountUpperBoundOperator { get; set; }
+
+    public decimal? CapitalAmountUpperBoundValue { get; set; }
 }

@@ -1,0 +1,132 @@
+@page
+@model Leads.Web.Pages.Passkeys.LoginModel
+@using Leads.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">@L["PasskeyLogin"]</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Input.UserNameOrEmail" class="form-label">@L["UserNameOrEmail"]</label>
+                    <input asp-for="Input.UserNameOrEmail" class="form-control" id="userNameOrEmail" />
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button" id="passkeyLoginBtn" class="btn btn-primary">@L["PasskeyLogin"]</button>
+                    <a href="~/Account/Login" class="btn btn-outline-secondary">@L["BackToPasswordLogin"]</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            const button = document.getElementById("passkeyLoginBtn");
+            const userNameInput = document.getElementById("userNameOrEmail");
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const antiForgeryToken = tokenInput ? tokenInput.value : "";
+            const returnUrl = '@(System.Net.WebUtility.UrlEncode(Model.ReturnUrl ?? string.Empty))';
+
+            const decodeBase64Url = (value) => {
+                const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+                const pad = base64.length % 4 === 0 ? 0 : 4 - (base64.length % 4);
+                const normalized = base64 + "=".repeat(pad);
+                const binary = atob(normalized);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return bytes.buffer;
+            };
+
+            const encodeBase64Url = (buffer) => {
+                const bytes = new Uint8Array(buffer);
+                let binary = "";
+                for (let i = 0; i < bytes.length; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+            };
+
+            const normalizeRequestOptions = (publicKey) => {
+                publicKey.challenge = decodeBase64Url(publicKey.challenge);
+                if (Array.isArray(publicKey.allowCredentials)) {
+                    for (const credential of publicKey.allowCredentials) {
+                        credential.id = decodeBase64Url(credential.id);
+                    }
+                }
+                return publicKey;
+            };
+
+            const toPublicKeyCredentialJson = (credential) => {
+                const response = credential.response;
+                return {
+                    id: credential.id,
+                    rawId: encodeBase64Url(credential.rawId),
+                    type: credential.type,
+                    response: {
+                        clientDataJson: encodeBase64Url(response.clientDataJSON),
+                        authenticatorData: response.authenticatorData ? encodeBase64Url(response.authenticatorData) : null,
+                        signature: response.signature ? encodeBase64Url(response.signature) : null,
+                        userHandle: response.userHandle ? encodeBase64Url(response.userHandle) : null
+                    },
+                    clientExtensionResults: credential.getClientExtensionResults ? credential.getClientExtensionResults() : {}
+                };
+            };
+
+            const postJson = async (handler, payload) => {
+                const response = await fetch(`?handler=${handler}&returnUrl=${returnUrl}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": antiForgeryToken,
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(data.message || "Passkey sign-in failed.");
+                }
+
+                return data;
+            };
+
+            button.addEventListener("click", async function () {
+                try {
+                    const userNameOrEmail = (userNameInput.value || "").trim();
+                    if (!userNameOrEmail) {
+                        throw new Error("@L["UserNameRequired"]");
+                    }
+
+                    const requestOptions = await postJson("RequestOptions", { userNameOrEmail: userNameOrEmail });
+                    const publicKey = normalizeRequestOptions(JSON.parse(requestOptions.optionsJson));
+                    const assertion = await navigator.credentials.get({ publicKey: publicKey });
+
+                    if (!assertion) {
+                        throw new Error("Passkey assertion failed.");
+                    }
+
+                    const credentialJson = JSON.stringify(toPublicKeyCredentialJson(assertion));
+                    const signInResult = await postJson("SignIn", { credentialJson: credentialJson });
+                    location.href = signInResult.redirectUrl || "/";
+                } catch (error) {
+                    abp.message.error(error.message || "@L["PasskeySignInFailed"]");
+                }
+            });
+        })();
+    </script>
+}

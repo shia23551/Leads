@@ -1,0 +1,182 @@
+@page
+@model Leads.Web.Pages.Passkeys.ManageModel
+@using Leads.Localization
+@using Leads.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    PageLayout.Content.Title = L["Passkeys"].Value;
+    PageLayout.Content.MenuItemName = LeadsMenus.Passkeys;
+}
+
+@Html.AntiForgeryToken()
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">@L["Passkeys"]</h5>
+        @if (Model.IsPasskeySupported)
+        {
+            <button type="button" id="addPasskeyBtn" class="btn btn-primary btn-sm">@L["AddPasskey"]</button>
+        }
+    </div>
+    <div class="card-body">
+        @if (!Model.IsPasskeySupported)
+        {
+            <div class="alert alert-warning mb-0">@L["PasskeyNotSupported"]</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>@L["PasskeyName"]</th>
+                            <th>@L["CreatedAt"]</th>
+                            <th>@L["CredentialId"]</th>
+                            <th class="text-end">@L["Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Passkeys.Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-center py-4 text-muted">@L["NoPasskeysFound"]</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var passkey in Model.Passkeys)
+                            {
+                                <tr>
+                                    <td>@passkey.Name</td>
+                                    <td>@passkey.CreatedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td><code>@passkey.CredentialId</code></td>
+                                    <td class="text-end">
+                                        <form method="post" asp-page-handler="Delete" class="d-inline" onsubmit="return confirm('@L["DeleteConfirmationMessage", passkey.Name]');">
+                                            <input type="hidden" name="credentialId" value="@passkey.CredentialId" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">@L["Delete"]</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            const addButton = document.getElementById("addPasskeyBtn");
+            if (!addButton) {
+                return;
+            }
+
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const antiForgeryToken = tokenInput ? tokenInput.value : "";
+
+            const decodeBase64Url = (value) => {
+                const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+                const pad = base64.length % 4 === 0 ? 0 : 4 - (base64.length % 4);
+                const normalized = base64 + "=".repeat(pad);
+                const binary = atob(normalized);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return bytes.buffer;
+            };
+
+            const encodeBase64Url = (buffer) => {
+                const bytes = new Uint8Array(buffer);
+                let binary = "";
+                for (let i = 0; i < bytes.length; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+            };
+
+            const normalizeOptions = (publicKey) => {
+                publicKey.challenge = decodeBase64Url(publicKey.challenge);
+                if (publicKey.user && publicKey.user.id) {
+                    publicKey.user.id = decodeBase64Url(publicKey.user.id);
+                }
+                if (Array.isArray(publicKey.excludeCredentials)) {
+                    for (const credential of publicKey.excludeCredentials) {
+                        credential.id = decodeBase64Url(credential.id);
+                    }
+                }
+                if (Array.isArray(publicKey.allowCredentials)) {
+                    for (const credential of publicKey.allowCredentials) {
+                        credential.id = decodeBase64Url(credential.id);
+                    }
+                }
+                return publicKey;
+            };
+
+            const toPublicKeyCredentialJson = (credential) => {
+                const response = credential.response;
+                return {
+                    id: credential.id,
+                    rawId: encodeBase64Url(credential.rawId),
+                    type: credential.type,
+                    response: {
+                        clientDataJson: encodeBase64Url(response.clientDataJSON),
+                        attestationObject: response.attestationObject ? encodeBase64Url(response.attestationObject) : null,
+                        authenticatorData: response.authenticatorData ? encodeBase64Url(response.authenticatorData) : null,
+                        signature: response.signature ? encodeBase64Url(response.signature) : null,
+                        userHandle: response.userHandle ? encodeBase64Url(response.userHandle) : null,
+                        transports: typeof response.getTransports === "function" ? response.getTransports() : []
+                    },
+                    clientExtensionResults: credential.getClientExtensionResults ? credential.getClientExtensionResults() : {}
+                };
+            };
+
+            const postJson = async (handler, payload) => {
+                const response = await fetch(`?handler=${handler}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": antiForgeryToken,
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(data.message || "Passkey operation failed.");
+                }
+
+                return data;
+            };
+
+            addButton.addEventListener("click", async function () {
+                try {
+                    const passkeyName = prompt("@L["PasskeyNamePrompt"]", "My Passkey");
+                    if (passkeyName === null) {
+                        return;
+                    }
+
+                    const createOptions = await postJson("CreateOptions", { displayName: passkeyName });
+                    const publicKey = normalizeOptions(JSON.parse(createOptions.optionsJson));
+                    const credential = await navigator.credentials.create({ publicKey: publicKey });
+
+                    if (!credential) {
+                        throw new Error("Credential creation was cancelled.");
+                    }
+
+                    const credentialJson = JSON.stringify(toPublicKeyCredentialJson(credential));
+                    await postJson("Register", { credentialJson: credentialJson, name: passkeyName });
+
+                    location.reload();
+                } catch (error) {
+                    abp.message.error(error.message || "@L["PasskeyRegistrationFailed"]");
+                }
+            });
+        })();
+    </script>
+}

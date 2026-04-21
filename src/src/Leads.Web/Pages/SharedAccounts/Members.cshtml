@@ -1,0 +1,140 @@
+@page
+@model Leads.Web.Pages.SharedAccounts.MembersModel
+@using Leads.Localization
+@using Leads.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    PageLayout.Content.Title = L["SharedAccountMembers"].Value;
+    PageLayout.Content.MenuItemName = LeadsMenus.SharedAccountMembers;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white"><h5 class="mb-0">@L["InviteUserToTenant"]</h5></div>
+    <div class="card-body">
+        @if (!string.IsNullOrWhiteSpace(Model.InvitationMessage))
+        {
+            <div class="alert alert-info">@Model.InvitationMessage</div>
+        }
+
+        <form method="post" asp-page-handler="Invite" class="row g-3">
+            <div class="col-md-5">
+                <label asp-for="InviteInput.Email" class="form-label">@L["Email"]</label>
+                <input asp-for="InviteInput.Email" class="form-control" />
+            </div>
+            <div class="col-md-5">
+                <label asp-for="InviteInput.RoleNames" class="form-label">@L["RoleNamesCsv"]</label>
+                <input asp-for="InviteInput.RoleNames" class="form-control" placeholder="admin, user" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">@L["Invite"]</button>
+            </div>
+        </form>
+
+        @if (!string.IsNullOrWhiteSpace(Model.InviteLinkPreview))
+        {
+            <div class="alert alert-info mt-3 mb-0">
+                <div class="fw-semibold mb-2">@L["InvitationLink"]</div>
+                <input class="form-control" readonly value="@Model.InviteLinkPreview" />
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white"><h5 class="mb-0">@L["TenantMembers"]</h5></div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["UserName"]</th>
+                        <th>@L["Name"]</th>
+                        <th>@L["Email"]</th>
+                        <th class="text-end">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Members.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-center py-4 text-muted">@L["NoMembersFound"]</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var member in Model.Members)
+                        {
+                            <tr>
+                                <td>@member.UserName</td>
+                                <td>@member.Name</td>
+                                <td>@member.Email</td>
+                                <td class="text-end">
+                                    <form method="post" asp-page-handler="RemoveMember" class="d-inline" onsubmit="return confirm('@L["RemoveMemberConfirmation", member.UserName ?? "-"]');">
+                                        <input type="hidden" name="memberUserId" value="@member.UserId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">@L["Remove"]</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white"><h5 class="mb-0">@L["InvitationHistory"]</h5></div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["Email"]</th>
+                        <th>@L["RoleNamesCsv"]</th>
+                        <th>@L["ExpireTime"]</th>
+                        <th>@L["InvitationStatus"]</th>
+                        <th class="text-end">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Invitations.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-center py-4 text-muted">@L["NoDataFound"]</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var invitation in Model.Invitations)
+                        {
+                            var isExpired = invitation.ExpireTime <= DateTime.UtcNow;
+                            var status = invitation.IsRevoked
+                                ? L["Revoked"].Value
+                                : invitation.AcceptedTime.HasValue
+                                    ? L["Accepted"].Value
+                                    : isExpired
+                                        ? L["Expired"].Value
+                                        : L["Pending"].Value;
+
+                            <tr>
+                                <td>@invitation.Email</td>
+                                <td>@(invitation.RoleNames ?? "-")</td>
+                                <td>@invitation.ExpireTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>@status</td>
+                                <td class="text-end">
+                                    @if (!invitation.IsRevoked && !invitation.AcceptedTime.HasValue && !isExpired)
+                                    {
+                                        <form method="post" asp-page-handler="RevokeInvitation" class="d-inline" onsubmit="return confirm('@L["RevokeInvitationConfirm"]');">
+                                            <input type="hidden" name="id" value="@invitation.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-warning">@L["Revoke"]</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

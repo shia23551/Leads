@@ -1,0 +1,412 @@
+@page
+@model Leads.Web.Pages.Organizations.IndexModel
+@using Leads.Localization
+@using Leads.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    PageLayout.Content.Title = L["Organizations"].Value;
+    PageLayout.Content.MenuItemName = LeadsMenus.Organizations;
+    var selected = Model.SelectedOrganizationUnit;
+}
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">@L["Organizations"]</h5>
+                @if (Model.IsAdmin)
+                {
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#createRootModal">
+                        @L["CreateRootOrganization"]
+                    </button>
+                }
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @if (Model.OrganizationUnits.Count == 0)
+                    {
+                        <div class="p-3 text-muted">@L["NoOrganizationsFound"]</div>
+                    }
+                    else
+                    {
+                        @foreach (var unit in Model.OrganizationUnits)
+                        {
+                            var isSelected = selected?.Id == unit.Id;
+                            var padding = 12 + (unit.Level * 18);
+                            <a asp-page="/Organizations/Index"
+                               asp-route-selectedOrganizationUnitId="@unit.Id"
+                               class="list-group-item list-group-item-action @(isSelected ? "active" : string.Empty)">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div style="padding-left:@(padding)px">
+                                        <div class="fw-semibold">@unit.DisplayName</div>
+                                        <small class="@(isSelected ? "text-white-50" : "text-muted")">
+                                            @L["Supervisor"]: @(unit.SupervisorDisplayName ?? "-")
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">@(selected?.DisplayName ?? L["OrganizationDetails"].Value)</h5>
+                @if (selected != null && Model.CanManageSelected)
+                {
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createChildModal">
+                            @L["CreateChildOrganization"]
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editOrganizationModal"
+                                data-ou-id="@selected.Id"
+                                data-ou-name="@selected.DisplayName"
+                                data-supervisor-id="@(selected.SupervisorUserId?.ToString() ?? string.Empty)"
+                                data-supervisor-name="@(selected.SupervisorDisplayName ?? string.Empty)">
+                            @L["Edit"]
+                        </button>
+                        <form method="post" asp-page-handler="DeleteOrganizationUnit" class="d-inline" onsubmit="return confirm('@L["DeleteOrganizationConfirmation", selected.DisplayName]');">
+                            <input type="hidden" name="id" value="@selected.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">@L["Delete"]</button>
+                        </form>
+                    </div>
+                }
+            </div>
+            <div class="card-body">
+                @if (selected == null)
+                {
+                    <div class="text-muted">@L["SelectOrganizationHint"]</div>
+                }
+                else
+                {
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">@L["OrganizationName"]</dt>
+                        <dd class="col-sm-9">@selected.DisplayName</dd>
+
+                        <dt class="col-sm-3">@L["Supervisor"]</dt>
+                        <dd class="col-sm-9">@(selected.SupervisorDisplayName ?? "-")</dd>
+                    </dl>
+                }
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">@L["Members"]</h5>
+                @if (selected != null && Model.CanManageSelected)
+                {
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                        @L["AddMember"]
+                    </button>
+                }
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>@L["UserName"]</th>
+                                <th>@L["Name"]</th>
+                                <th>@L["Email"]</th>
+                                @if (selected != null && Model.CanManageSelected)
+                                {
+                                    <th class="text-end">@L["Actions"]</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (selected == null || Model.Members.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">@L["NoMembersFound"]</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var member in Model.Members)
+                                {
+                                    <tr>
+                                        <td>@member.UserName</td>
+                                        <td>@member.DisplayName</td>
+                                        <td>@member.Email</td>
+                                        @if (Model.CanManageSelected)
+                                        {
+                                            <td class="text-end">
+                                                <form method="post" asp-page-handler="RemoveMember" class="d-inline" onsubmit="return confirm('@L["RemoveMemberConfirmation", member.UserName]');">
+                                                    <input type="hidden" name="organizationUnitId" value="@selected!.Id" />
+                                                    <input type="hidden" name="userId" value="@member.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">@L["Remove"]</button>
+                                                </form>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createRootModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="CreateOrganizationUnit">
+                <div class="modal-header">
+                    <h5 class="modal-title">@L["CreateRootOrganization"]</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">@L["OrganizationName"]</label>
+                        <input name="displayName" class="form-control" required />
+                    </div>
+                    <div>
+                        <label class="form-label">@L["Supervisor"]</label>
+                        <div class="input-group">
+                            <input id="createRootSupervisorDisplay" class="form-control" readonly placeholder="@L["NoSelection"]" />
+                            <input type="hidden" id="createRootSupervisorUserId" name="supervisorUserId" />
+                            <button type="button" class="btn btn-outline-secondary user-search-btn" data-search-target="createRoot" data-org-id="@(selected?.Id)">@L["Select"]</button>
+                            <button type="button" class="btn btn-outline-danger clear-user-btn" data-search-target="createRoot">@L["Clear"]</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@L["Cancel"]</button>
+                    <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createChildModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="CreateOrganizationUnit">
+                <div class="modal-header">
+                    <h5 class="modal-title">@L["CreateChildOrganization"]</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="parentId" value="@(selected?.Id)" />
+                    <div class="mb-3">
+                        <label class="form-label">@L["OrganizationName"]</label>
+                        <input name="displayName" class="form-control" required />
+                    </div>
+                    <div>
+                        <label class="form-label">@L["Supervisor"]</label>
+                        <div class="input-group">
+                            <input id="createChildSupervisorDisplay" class="form-control" readonly placeholder="@L["NoSelection"]" />
+                            <input type="hidden" id="createChildSupervisorUserId" name="supervisorUserId" />
+                            <button type="button" class="btn btn-outline-secondary user-search-btn" data-search-target="createChild" data-org-id="@(selected?.Id)">@L["Select"]</button>
+                            <button type="button" class="btn btn-outline-danger clear-user-btn" data-search-target="createChild">@L["Clear"]</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@L["Cancel"]</button>
+                    <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editOrganizationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="UpdateOrganizationUnit">
+                <div class="modal-header">
+                    <h5 class="modal-title">@L["EditOrganization"]</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editOrganizationId" name="id" />
+                    <div class="mb-3">
+                        <label class="form-label">@L["OrganizationName"]</label>
+                        <input id="editOrganizationName" name="displayName" class="form-control" required />
+                    </div>
+                    <div>
+                        <label class="form-label">@L["Supervisor"]</label>
+                        <div class="input-group">
+                            <input id="editSupervisorDisplay" class="form-control" readonly placeholder="@L["NoSelection"]" />
+                            <input type="hidden" id="editSupervisorUserId" name="supervisorUserId" />
+                            <button type="button" class="btn btn-outline-secondary user-search-btn" data-search-target="edit" data-org-id="@(selected?.Id)">@L["Select"]</button>
+                            <button type="button" class="btn btn-outline-danger clear-user-btn" data-search-target="edit">@L["Clear"]</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@L["Cancel"]</button>
+                    <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addMemberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="AddMember">
+                <div class="modal-header">
+                    <h5 class="modal-title">@L["AddMember"]</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="organizationUnitId" value="@(selected?.Id)" />
+                    <input type="hidden" id="addMemberUserId" name="userId" />
+                    <div class="input-group">
+                        <input id="addMemberUserDisplay" class="form-control" readonly placeholder="@L["NoSelection"]" />
+                        <button type="button" class="btn btn-outline-secondary user-search-btn" data-search-target="member" data-org-id="@(selected?.Id)">@L["Select"]</button>
+                        <button type="button" class="btn btn-outline-danger clear-user-btn" data-search-target="member">@L["Clear"]</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@L["Cancel"]</button>
+                    <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="userSearchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@L["SearchUsers"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <input id="userSearchKeyword" class="form-control" placeholder="@L["SearchUserPlaceholder"]" />
+                    <button id="userSearchButton" type="button" class="btn btn-primary">@L["Search"]</button>
+                </div>
+                <div id="userSearchResults" class="list-group"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            const searchModalEl = document.getElementById("userSearchModal");
+            const searchModal = new bootstrap.Modal(searchModalEl);
+            const searchResults = document.getElementById("userSearchResults");
+            const searchKeyword = document.getElementById("userSearchKeyword");
+            const searchButton = document.getElementById("userSearchButton");
+            let currentTarget = null;
+            let currentOrganizationId = "";
+
+            const targetMap = {
+                createRoot: { hidden: "createRootSupervisorUserId", text: "createRootSupervisorDisplay" },
+                createChild: { hidden: "createChildSupervisorUserId", text: "createChildSupervisorDisplay" },
+                edit: { hidden: "editSupervisorUserId", text: "editSupervisorDisplay" },
+                member: { hidden: "addMemberUserId", text: "addMemberUserDisplay" }
+            };
+
+            function setTargetValue(targetKey, userId, userText) {
+                const target = targetMap[targetKey];
+                if (!target) {
+                    return;
+                }
+
+                document.getElementById(target.hidden).value = userId || "";
+                document.getElementById(target.text).value = userText || "";
+            }
+
+            function renderResults(items) {
+                searchResults.innerHTML = "";
+
+                if (!items || items.length === 0) {
+                    searchResults.innerHTML = `<div class="text-muted p-2">@L["NoUsersFound"]</div>`;
+                    return;
+                }
+
+                for (const item of items) {
+                    const row = document.createElement("button");
+                    row.type = "button";
+                    row.className = "list-group-item list-group-item-action";
+                    row.innerHTML = `<div class="fw-semibold">${item.displayName}</div><small class="text-muted">${item.userName} ${item.email ? " / " + item.email : ""}</small>`;
+                    row.addEventListener("click", function () {
+                        setTargetValue(currentTarget, item.id, `${item.displayName} (${item.userName})`);
+                        searchModal.hide();
+                    });
+
+                    searchResults.appendChild(row);
+                }
+            }
+
+            async function searchUsers() {
+                if (!currentTarget) {
+                    return;
+                }
+
+                const keyword = encodeURIComponent(searchKeyword.value || "");
+                let url = `?handler=SearchUsers&filter=${keyword}`;
+                if (currentOrganizationId) {
+                    const orgId = encodeURIComponent(currentOrganizationId);
+                    url += `&organizationUnitId=${orgId}`;
+                }
+                const response = await fetch(url, { method: "GET", headers: { "X-Requested-With": "XMLHttpRequest" } });
+
+                if (!response.ok) {
+                    renderResults([]);
+                    return;
+                }
+
+                const data = await response.json();
+                renderResults(data);
+            }
+
+            document.querySelectorAll(".user-search-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    currentTarget = btn.getAttribute("data-search-target");
+                    currentOrganizationId = btn.getAttribute("data-org-id");
+                    searchKeyword.value = "";
+                    searchResults.innerHTML = "";
+                    searchModal.show();
+                });
+            });
+
+            document.querySelectorAll(".clear-user-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    const target = btn.getAttribute("data-search-target");
+                    setTargetValue(target, "", "");
+                });
+            });
+
+            searchButton.addEventListener("click", searchUsers);
+            searchKeyword.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    searchUsers();
+                }
+            });
+
+            const editModal = document.getElementById("editOrganizationModal");
+            editModal.addEventListener("show.bs.modal", function (event) {
+                const button = event.relatedTarget;
+                document.getElementById("editOrganizationId").value = button.getAttribute("data-ou-id") || "";
+                document.getElementById("editOrganizationName").value = button.getAttribute("data-ou-name") || "";
+                document.getElementById("editSupervisorUserId").value = button.getAttribute("data-supervisor-id") || "";
+                document.getElementById("editSupervisorDisplay").value = button.getAttribute("data-supervisor-name") || "";
+            });
+        })();
+    </script>
+}

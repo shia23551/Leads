@@ -40,6 +40,7 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
 using Volo.Abp.Account.Web;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Toolbars;
@@ -156,6 +157,18 @@ public class LeadsWebModule : AbpModule
         Configure<PermissionManagementOptions>(options =>
         {
             options.IsDynamicPermissionStoreEnabled = true;
+        });
+
+        Configure<IdentityPasskeyOptions>(options =>
+        {
+            options.AuthenticatorTimeout = TimeSpan.FromMinutes(3);
+            options.ChallengeSize = 64;
+
+            var serverDomain = configuration["Passkey:ServerDomain"];
+            if (!serverDomain.IsNullOrWhiteSpace())
+            {
+                options.ServerDomain = serverDomain;
+            }
         });
     }
 

@@ -1,0 +1,126 @@
+@page
+@model Leads.Web.Pages.Users.IndexModel
+@using Leads.Localization
+@using Leads.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    PageLayout.Content.Title = L["Users"].Value;
+    PageLayout.Content.MenuItemName = LeadsMenus.Users;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label asp-for="Filter" class="form-label">@L["Filter"]</label>
+                <input asp-for="Filter" class="form-control" />
+            </div>
+            <div class="col-md-6 d-flex gap-2 justify-content-end flex-wrap">
+                <button type="submit" class="btn btn-primary">@L["Search"]</button>
+                <a asp-page="/Users/Index" class="btn btn-outline-secondary">@L["Reset"]</a>
+                @if (Model.CanCreate)
+                {
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                        <i class="fa fa-plus me-1"></i>@L["NewUser"]
+                    </button>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["UserName"]</th>
+                        <th>@L["Name"]</th>
+                        <th>@L["Email"]</th>
+                        <th>@L["PhoneNumber"]</th>
+                        <th>@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Users.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">@L["NoUsersFound"]</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in Model.Users)
+                        {
+                            var fullName = $"{user.Name} {user.Surname}".Trim();
+                            <tr>
+                                <td>@user.UserName</td>
+                                <td>@(string.IsNullOrWhiteSpace(fullName) ? "-" : fullName)</td>
+                                <td>@user.Email</td>
+                                <td>@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "-" : user.PhoneNumber)</td>
+                                <td class="text-muted">-</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (Model.CanCreate)
+{
+    <div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="Create">
+                    <div class="modal-header">
+                        <h5 class="modal-title">@L["CreateUser"]</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="CreateInput.UserName" class="form-label">@L["UserName"]</label>
+                                <input asp-for="CreateInput.UserName" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CreateInput.Email" class="form-label">@L["Email"]</label>
+                                <input asp-for="CreateInput.Email" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CreateInput.Name" class="form-label">@L["Name"]</label>
+                                <input asp-for="CreateInput.Name" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CreateInput.Surname" class="form-label">@L["Surname"]</label>
+                                <input asp-for="CreateInput.Surname" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CreateInput.PhoneNumber" class="form-label">@L["PhoneNumber"]</label>
+                                <input asp-for="CreateInput.PhoneNumber" class="form-control" />
+                            </div>
+                            <div class="col-md-6"></div>
+                            <div class="col-md-6">
+                                <label asp-for="CreateInput.Password" class="form-label">@L["Password"]</label>
+                                <input asp-for="CreateInput.Password" class="form-control" type="password" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CreateInput.ConfirmPassword" class="form-label">@L["ConfirmPassword"]</label>
+                                <input asp-for="CreateInput.ConfirmPassword" class="form-control" type="password" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">@L["Cancel"]</button>
+                        <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

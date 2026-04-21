@@ -1,0 +1,55 @@
+@model Leads.Web.Pages.OpenIddict.Applications.IndexModel.EditApplicationViewModel
+@using Leads.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<LeadsResource> L
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="ClientId" class="form-label">@L["ClientId"]</label>
+        <input asp-for="ClientId" class="form-control" />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DisplayName" class="form-label">@L["DisplayName"]</label>
+        <input asp-for="DisplayName" class="form-control" />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ClientSecret" class="form-label">@L["ClientSecret"]</label>
+        <input asp-for="ClientSecret" class="form-control" />
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="ApplicationType" class="form-label">@L["ApplicationType"]</label>
+        <select asp-for="ApplicationType" class="form-select">
+            <option value="web">web</option>
+            <option value="native">native</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ClientType" class="form-label">@L["ClientType"]</label>
+        <select asp-for="ClientType" class="form-select">
+            <option value="confidential">confidential</option>
+            <option value="public">public</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ConsentType" class="form-label">@L["ConsentType"]</label>
+        <select asp-for="ConsentType" class="form-select">
+            <option value="explicit">explicit</option>
+            <option value="implicit">implicit</option>
+            <option value="external">external</option>
+        </select>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="RedirectUris" class="form-label">@L["RedirectUris"]</label>
+        <textarea asp-for="RedirectUris" rows="4" class="form-control"></textarea>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="PostLogoutRedirectUris" class="form-label">@L["PostLogoutRedirectUris"]</label>
+        <textarea asp-for="PostLogoutRedirectUris" rows="4" class="form-control"></textarea>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Permissions" class="form-label">@L["Permissions"]</label>
+        <textarea asp-for="Permissions" rows="4" class="form-control"></textarea>
+    </div>
+</div>

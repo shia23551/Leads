@@ -1,0 +1,44 @@
+@page
+@model Leads.Web.Pages.SharedAccounts.AcceptInvitationModel
+@using Leads.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<LeadsResource> L
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">@L["AcceptTenantInvitation"]</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.InvitationInfo == null)
+                {
+                    <div class="alert alert-warning mb-0">@L["InvitationNotFound"]</div>
+                }
+                else
+                {
+                    <dl class="row mb-3">
+                        <dt class="col-sm-4">@L["Email"]</dt>
+                        <dd class="col-sm-8">@Model.InvitationInfo.Email</dd>
+                        <dt class="col-sm-4">@L["RoleNamesCsv"]</dt>
+                        <dd class="col-sm-8">@(Model.InvitationInfo.RoleNames ?? "-")</dd>
+                        <dt class="col-sm-4">@L["ExpireTime"]</dt>
+                        <dd class="col-sm-8">@Model.InvitationInfo.ExpireTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</dd>
+                    </dl>
+
+                    @if (!Model.CanAccept)
+                    {
+                        <div class="alert alert-danger">@L["InvitationEmailMismatch"]</div>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="Accept">
+                            <input type="hidden" asp-for="Token" />
+                            <button type="submit" class="btn btn-primary">@L["AcceptInvitation"]</button>
+                        </form>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

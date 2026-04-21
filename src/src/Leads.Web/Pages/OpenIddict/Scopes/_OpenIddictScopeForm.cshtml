@@ -1,0 +1,24 @@
+@model Leads.Web.Pages.OpenIddict.Scopes.IndexModel.EditScopeViewModel
+@using Leads.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<LeadsResource> L
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label asp-for="Name" class="form-label">@L["ScopeName"]</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DisplayName" class="form-label">@L["DisplayName"]</label>
+        <input asp-for="DisplayName" class="form-control" />
+    </div>
+    <div class="col-md-4">
+        <label asp-for="Description" class="form-label">@L["Description"]</label>
+        <input asp-for="Description" class="form-control" />
+    </div>
+
+    <div class="col-md-12">
+        <label asp-for="Resources" class="form-label">@L["Resources"]</label>
+        <textarea asp-for="Resources" rows="4" class="form-control"></textarea>
+    </div>
+</div>

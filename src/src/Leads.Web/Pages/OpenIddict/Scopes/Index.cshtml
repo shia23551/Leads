@@ -1,0 +1,105 @@
+@page
+@model Leads.Web.Pages.OpenIddict.Scopes.IndexModel
+@using Leads.Localization
+@using Leads.Web.Menus
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Volo.Abp.AspNetCore.Mvc.UI.Layout
+@inject IPageLayout PageLayout
+@inject IHtmlLocalizer<LeadsResource> L
+@{
+    PageLayout.Content.Title = L["OpenIddictScopes"].Value;
+    PageLayout.Content.MenuItemName = LeadsMenus.OpenIddictScopes;
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label asp-for="Filter" class="form-label">@L["Filter"]</label>
+                <input asp-for="Filter" class="form-control" />
+            </div>
+            <div class="col-md-6 d-flex gap-2 justify-content-end">
+                <button type="submit" class="btn btn-primary">@L["Search"]</button>
+                <a asp-page="/OpenIddict/Scopes/Index" class="btn btn-outline-secondary">@L["Reset"]</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white"><h5 class="mb-0">@L["OpenIddictScopes"]</h5></div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["ScopeName"]</th>
+                        <th>@L["DisplayName"]</th>
+                        <th>@L["Description"]</th>
+                        <th class="text-end">@L["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Scopes.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-center py-4 text-muted">@L["NoDataFound"]</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var scope in Model.Scopes)
+                        {
+                            <tr>
+                                <td>@scope.Name</td>
+                                <td>@(scope.DisplayName ?? "-")</td>
+                                <td>@(scope.Description ?? "-")</td>
+                                <td class="text-end">
+                                    @if (Model.CanEdit)
+                                    {
+                                        <a asp-page="/OpenIddict/Scopes/Index" asp-route-editId="@scope.Id" class="btn btn-sm btn-outline-secondary">@L["Edit"]</a>
+                                    }
+                                    @if (Model.CanDelete)
+                                    {
+                                        <form method="post" asp-page-handler="Delete" class="d-inline" onsubmit="return confirm('@L["DeleteConfirmationMessage", scope.Name ?? "-"]');">
+                                            <input type="hidden" name="id" value="@scope.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">@L["Delete"]</button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (Model.CanCreate)
+{
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white"><h5 class="mb-0">@L["CreateOpenIddictScope"]</h5></div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="Create">
+                <partial name="_OpenIddictScopeForm" model="Model.CreateInput" />
+                <div class="mt-3 text-end"><button type="submit" class="btn btn-primary">@L["Save"]</button></div>
+            </form>
+        </div>
+    </div>
+}
+
+@if (Model.EditId.HasValue && Model.CanEdit)
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white"><h5 class="mb-0">@L["EditOpenIddictScope"]</h5></div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="Update">
+                <input type="hidden" name="id" value="@Model.EditId" />
+                <partial name="_OpenIddictScopeForm" model="Model.EditInput" />
+                <div class="mt-3 d-flex justify-content-end gap-2">
+                    <a asp-page="/OpenIddict/Scopes/Index" class="btn btn-outline-secondary">@L["Cancel"]</a>
+                    <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}

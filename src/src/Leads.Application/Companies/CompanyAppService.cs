@@ -118,29 +118,51 @@ public class CompanyAppService : LeadsAppService, ICompanyAppService
             .WhereIf(!string.IsNullOrWhiteSpace(taxId), x => x.TaxId != null && x.TaxId.StartsWith(taxId!))
             .WhereIf(!string.IsNullOrWhiteSpace(industryCategory), x => x.IndustryCategory != null && x.IndustryCategory.Contains(industryCategory!));
 
-        if (input.EmployeeCountOperator.HasValue && input.EmployeeCountValue.HasValue)
-        {
-            query = input.EmployeeCountOperator.Value switch
-            {
-                ComparisonOperator.Equal => query.Where(x => x.EmployeeCount == input.EmployeeCountValue.Value),
-                ComparisonOperator.GreaterThan => query.Where(x => x.EmployeeCount > input.EmployeeCountValue.Value),
-                ComparisonOperator.LessThan => query.Where(x => x.EmployeeCount < input.EmployeeCountValue.Value),
-                _ => query
-            };
-        }
+        query = ApplyEmployeeCountFilter(query, input.EmployeeCountLowerBoundOperator, input.EmployeeCountLowerBoundValue);
+        query = ApplyEmployeeCountFilter(query, input.EmployeeCountUpperBoundOperator, input.EmployeeCountUpperBoundValue);
 
-        if (input.CapitalAmountOperator.HasValue && input.CapitalAmountValue.HasValue)
-        {
-            query = input.CapitalAmountOperator.Value switch
-            {
-                ComparisonOperator.Equal => query.Where(x => x.CapitalAmount == input.CapitalAmountValue.Value),
-                ComparisonOperator.GreaterThan => query.Where(x => x.CapitalAmount > input.CapitalAmountValue.Value),
-                ComparisonOperator.LessThan => query.Where(x => x.CapitalAmount < input.CapitalAmountValue.Value),
-                _ => query
-            };
-        }
+        query = ApplyCapitalAmountFilter(query, input.CapitalAmountLowerBoundOperator, input.CapitalAmountLowerBoundValue);
+        query = ApplyCapitalAmountFilter(query, input.CapitalAmountUpperBoundOperator, input.CapitalAmountUpperBoundValue);
 
         return query;
+    }
+
+    private static IQueryable<Company> ApplyEmployeeCountFilter(
+        IQueryable<Company> query,
+        ComparisonOperator? op,
+        int? value)
+    {
+        if (!op.HasValue || !value.HasValue)
+        {
+            return query;
+        }
+
+        return op.Value switch
+        {
+            ComparisonOperator.Equal => query.Where(x => x.EmployeeCount == value.Value),
+            ComparisonOperator.GreaterThan => query.Where(x => x.EmployeeCount > value.Value),
+            ComparisonOperator.LessThan => query.Where(x => x.EmployeeCount < value.Value),
+            _ => query
+        };
+    }
+
+    private static IQueryable<Company> ApplyCapitalAmountFilter(
+        IQueryable<Company> query,
+        ComparisonOperator? op,
+        decimal? value)
+    {
+        if (!op.HasValue || !value.HasValue)
+        {
+            return query;
+        }
+
+        return op.Value switch
+        {
+            ComparisonOperator.Equal => query.Where(x => x.CapitalAmount == value.Value),
+            ComparisonOperator.GreaterThan => query.Where(x => x.CapitalAmount > value.Value),
+            ComparisonOperator.LessThan => query.Where(x => x.CapitalAmount < value.Value),
+            _ => query
+        };
     }
 
     private async Task EnsureTaxIdIsUniqueAsync(string? taxId, Guid? companyId = null)

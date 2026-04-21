@@ -1,4 +1,5 @@
 using Leads.Companies;
+using Leads.SharedAccounts;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -29,6 +30,10 @@ public class LeadsDbContext :
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
 
     public DbSet<Company> Companies { get; set; }
+
+    public DbSet<TenantUserMembership> TenantUserMemberships { get; set; }
+
+    public DbSet<TenantUserInvitation> TenantUserInvitations { get; set; }
 
 
     #region Entities from the modules
@@ -102,6 +107,32 @@ public class LeadsDbContext :
             b.HasIndex(x => new { x.TenantId, x.TaxId }).IsUnique().HasFilter("[TaxId] IS NOT NULL AND [TaxId] <> ''");
             b.HasIndex(x => new { x.TenantId, x.Name });
             b.HasIndex(x => new { x.TenantId, x.ShortName });
+        });
+
+        builder.Entity<TenantUserMembership>(b =>
+        {
+            b.ToTable(LeadsConsts.DbTablePrefix + "TenantUserMemberships", LeadsConsts.DbSchema);
+            b.ConfigureByConvention();
+
+            b.Property(x => x.UserId).IsRequired();
+            b.Property(x => x.IsActive).IsRequired().HasDefaultValue(true);
+
+            b.HasIndex(x => new { x.TenantId, x.UserId }).IsUnique();
+            b.HasIndex(x => new { x.UserId, x.IsActive });
+        });
+
+        builder.Entity<TenantUserInvitation>(b =>
+        {
+            b.ToTable(LeadsConsts.DbTablePrefix + "TenantUserInvitations", LeadsConsts.DbSchema);
+            b.ConfigureByConvention();
+
+            b.Property(x => x.Email).IsRequired().HasMaxLength(TenantUserInvitation.MaxEmailLength);
+            b.Property(x => x.Token).IsRequired().HasMaxLength(TenantUserInvitation.MaxTokenLength);
+            b.Property(x => x.RoleNames).HasMaxLength(1024);
+
+            b.HasIndex(x => x.Token).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.Email, x.IsRevoked });
+            b.HasIndex(x => x.ExpireTime);
         });
     }
 }

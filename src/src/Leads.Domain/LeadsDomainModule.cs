@@ -43,6 +43,7 @@ public class LeadsDomainModule : AbpModule
         Configure<AbpMultiTenancyOptions>(options =>
         {
             options.IsEnabled = MultiTenancyConsts.IsEnabled;
+            options.UserSharingStrategy = TenantUserSharingStrategy.Shared;
         });
 
 

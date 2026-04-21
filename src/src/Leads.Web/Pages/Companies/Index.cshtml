@@ -35,27 +35,51 @@
                 <input asp-for="Input.IndustryCategory" class="form-control" />
             </div>
             <div class="col-md-2">
-                <label asp-for="Input.EmployeeCountOperator" class="form-label">@L["EmployeeCount"]</label>
-                <div class="input-group">
-                    <select asp-for="Input.EmployeeCountOperator" class="form-select">
-                        <option value="">@L["Operator"]</option>
-                        <option value="Equal">=</option>
-                        <option value="GreaterThan">&gt;</option>
-                        <option value="LessThan">&lt;</option>
-                    </select>
-                    <input asp-for="Input.EmployeeCountValue" type="number" class="form-control" placeholder="@L["Value"]" />
+                <label asp-for="Input.EmployeeCountLowerBoundOperator" class="form-label">@L["EmployeeCount"]</label>
+                <div class="d-flex flex-column gap-2">
+                    <div class="input-group">
+                        <select asp-for="Input.EmployeeCountLowerBoundOperator" class="form-select">
+                            <option value="">@L["Operator"]</option>
+                            <option value="Equal">=</option>
+                            <option value="GreaterThan">&gt;</option>
+                            <option value="LessThan">&lt;</option>
+                        </select>
+                        <input asp-for="Input.EmployeeCountLowerBoundValue" type="number" class="form-control" placeholder="@L["Value"]" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text">@L["And"]</span>
+                        <select asp-for="Input.EmployeeCountUpperBoundOperator" class="form-select">
+                            <option value="">@L["Operator"]</option>
+                            <option value="Equal">=</option>
+                            <option value="GreaterThan">&gt;</option>
+                            <option value="LessThan">&lt;</option>
+                        </select>
+                        <input asp-for="Input.EmployeeCountUpperBoundValue" type="number" class="form-control" placeholder="@L["Value"]" />
+                    </div>
                 </div>
             </div>
             <div class="col-md-2">
-                <label asp-for="Input.CapitalAmountOperator" class="form-label">@L["CapitalAmount"]</label>
-                <div class="input-group">
-                    <select asp-for="Input.CapitalAmountOperator" class="form-select">
-                        <option value="">@L["Operator"]</option>
-                        <option value="Equal">=</option>
-                        <option value="GreaterThan">&gt;</option>
-                        <option value="LessThan">&lt;</option>
-                    </select>
-                    <input asp-for="Input.CapitalAmountValue" type="number" step="0.01" class="form-control" placeholder="@L["Value"]" />
+                <label asp-for="Input.CapitalAmountLowerBoundOperator" class="form-label">@L["CapitalAmount"]</label>
+                <div class="d-flex flex-column gap-2">
+                    <div class="input-group">
+                        <select asp-for="Input.CapitalAmountLowerBoundOperator" class="form-select">
+                            <option value="">@L["Operator"]</option>
+                            <option value="Equal">=</option>
+                            <option value="GreaterThan">&gt;</option>
+                            <option value="LessThan">&lt;</option>
+                        </select>
+                        <input asp-for="Input.CapitalAmountLowerBoundValue" type="number" step="0.01" class="form-control" placeholder="@L["Value"]" />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text">@L["And"]</span>
+                        <select asp-for="Input.CapitalAmountUpperBoundOperator" class="form-select">
+                            <option value="">@L["Operator"]</option>
+                            <option value="Equal">=</option>
+                            <option value="GreaterThan">&gt;</option>
+                            <option value="LessThan">&lt;</option>
+                        </select>
+                        <input asp-for="Input.CapitalAmountUpperBoundValue" type="number" step="0.01" class="form-control" placeholder="@L["Value"]" />
+                    </div>
                 </div>
             </div>
             <div class="col-12 d-flex gap-2 justify-content-between flex-wrap">
